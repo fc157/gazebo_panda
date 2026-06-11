@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <physics type="ode">
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.2</sor>
+        </solver>
+      </ode>
+    </physics>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>2.5 2.5 1.5 0 0.3 2.4</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+    <!-- ================================================================
+         摄像头标定场景 - 在机械臂 (原点 0,0,0) 周围生成 4 面不同颜色的墙
+         设计目标:
+           1. 颜色对比鲜明 (红/绿/蓝/黄) 便于图像分割 / 颜色识别验证
+           2. 每面墙中心大致位于距机械臂 1.2m 的位置,落在相机视场(FOV≈60°)
+              与景深(0.05~5m)范围内
+           3. 4 面墙沿 +X / -X / +Y / -Y 方向分布,使相机旋转到不同姿态
+              都能拍到不同颜色
+           4. 额外加一块深灰色桌面,既方便对比又可避免地面纹理干扰
+         相机参数 (hand_camera):
+           fov = 1.047 rad (~60°), near = 0.05, far = 5.0
+           安装在 panda_hand 上,默认朝 +X 方向
+         ================================================================ -->
+
+    <!-- 墙 1 - 红色  位于 +X 方向  朝向 -X (即朝向机械臂) -->
+    <model name="wall_red">
+      <static>true</static>
+      <pose>1.2 0.0 0.75 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.05 1.5 1.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.05 1.5 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.0 0.0 1</ambient>
+            <diffuse>0.9 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 墙 2 - 绿色  位于 -X 方向  朝向 +X -->
+    <model name="wall_green">
+      <static>true</static>
+      <pose>-1.2 0.0 0.75 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.05 1.5 1.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.05 1.5 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.8 0.0 1</ambient>
+            <diffuse>0.1 0.9 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 墙 3 - 蓝色  位于 +Y 方向  朝向 -Y -->
+    <model name="wall_blue">
+      <static>true</static>
+      <pose>0.0 1.2 0.75 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.05 1.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.05 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.0 0.8 1</ambient>
+            <diffuse>0.1 0.1 0.9 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 墙 4 - 黄色  位于 -Y 方向  朝向 +Y -->
+    <model name="wall_yellow">
+      <static>true</static>
+      <pose>0.0 -1.2 0.75 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.05 1.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.05 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.0 1</ambient>
+            <diffuse>0.9 0.9 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

@@ -1,0 +1,7 @@
+<launch>
+  <!-- Define the MoveIt controller manager plugin -->
+  <arg name="moveit_controller_manager" default="moveit_simple_controller_manager/MoveItSimpleControllerManager" />
+
+  <!-- Load the controller configuration -->
+  <rosparam file="$(find panda_moveit_config)/config/moveit_controllers.yaml"/>
+</launch>

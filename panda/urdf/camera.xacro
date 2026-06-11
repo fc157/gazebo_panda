@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  手眼相机（eye-in-hand）宏
+  - 把一个 RGB-D 深度相机绑定到机械臂的 hand 关节上，随机械臂一起运动
+  - 通过 libgazebo_ros_camera.so + type="depth" sensor 一次性发布
+      camera_name/image_raw           - 彩色图 (sensor_msgs/Image)
+      camera_name/depth/image_raw     - 深度图 (sensor_msgs/Image, 32FC1)
+      camera_name/points              - 点云   (sensor_msgs/PointCloud2)
+      camera_name/camera_info         - 彩色相机内参
+      camera_name/depth/camera_info   - 深度相机内参
+  - 提供标准的 optical frame 以遵循 REP-103 / REP-104
+  注意 - xacro/URDF 内的 XML 注释里不要使用英文冒号 ":"
+        ROS 2 Foxy 在解析 robot_description 参数时会先用 yaml.safe_load
+        处理整段字符串，注释里的 ":" 会被当成 mapping 分隔符而报错。
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="camera">
+  <xacro:macro name="hand_camera"
+               params="ns:=''
+                       parent:='panda_hand'
+                       xyz:='0 0 0.07'
+                       rpy:='0 0 0'
+                       camera_name:='hand_camera'
+                       hfov:='1.047'
+                       width:='640'
+                       height:='480'
+                       near:='0.05'
+                       far:='5.0'
+                       update_rate:='30'">
+
+    <!-- ============= 相机机身 link ============= -->
+    <link name="${ns}_camera_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="1e-5" ixy="0" ixz="0"
+                 iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <!-- 一个小相机壳，方便在 Gazebo / RViz 里看到 -->
+          <box size="0.025 0.025 0.025"/>
+        </geometry>
+        <material name="camera_body">
+          <color rgba="0.1 0.1 0.1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.025 0.025 0.025"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ============= 把相机固定到 hand 关节 ============= -->
+    <joint name="${ns}_camera_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${ns}_camera_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- ============= 光学坐标系 (REP-103 / REP-104) =============
+         camera_link body frame - x-前, y-左, z-上
+         optical_frame          - x-右, y-下, z-前
+         转换 - 绕 z 旋转 -pi/2, 再绕 y 旋转 -pi/2
+    -->
+    <link name="${ns}_camera_optical_frame"/>
+    <joint name="${ns}_camera_optical_joint" type="fixed">
+      <parent link="${ns}_camera_link"/>
+      <child link="${ns}_camera_optical_frame"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+
+    <!-- ============= Gazebo 材质 ============= -->
+    <gazebo reference="${ns}_camera_link">
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <!-- ============= 深度相机 sensor (同时输出 RGB + 深度 + 点云) ============= -->
+    <gazebo reference="${ns}_camera_link">
+      <sensor name="${ns}_${camera_name}" type="depth">
+        <update_rate>${update_rate}</update_rate>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <camera>
+          <horizontal_fov>${hfov}</horizontal_fov>
+          <image>
+            <width>${width}</width>
+            <height>${height}</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>${near}</near>
+            <far>${far}</far>
+          </clip>
+          <depth_camera>
+            <output>depth</output>
+          </depth_camera>
+        </camera>
+        <!--
+          libgazebo_ros_camera.so 同时继承 CameraPlugin 和 DepthCameraPlugin
+          配合 type="depth" 可以一次性发布彩色图 / 深度图 / 点云
+        -->
+        <plugin name="${ns}_${camera_name}_controller"
+                filename="libgazebo_ros_camera.so">
+          <camera_name>${camera_name}</camera_name>
+          <frame_name>${ns}_camera_optical_frame</frame_name>
+          <hack_baseline>0.0</hack_baseline>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

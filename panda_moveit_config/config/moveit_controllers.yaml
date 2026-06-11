@@ -1,0 +1,30 @@
+moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
+
+moveit_simple_controller_manager:
+  controller_names:
+    - panda_arm_controller
+    - panda_gripper_controller
+
+  panda_arm_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - panda_joint1
+      - panda_joint2
+      - panda_joint3
+      - panda_joint4
+      - panda_joint5
+      - panda_joint6
+      - panda_joint7
+
+  # Both finger joints listed. finger_joint2 axis=(0 -1 0) means its
+  # signed value when open is negative (e.g. -0.035). OMPL plans for
+  # both joints with finger_joint1=+0.035, finger_joint2=-0.035.
+  panda_gripper_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - panda_finger_joint1
+      - panda_finger_joint2

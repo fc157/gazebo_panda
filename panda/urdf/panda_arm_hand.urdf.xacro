@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+  <!-- 简化的URDF - 直接加载Gazebo配置 -->
+  
+  <xacro:include filename="$(find panda)/urdf/panda_arm.urdf.xacro"/>
+  <xacro:include filename="$(find panda)/urdf/hand.xacro"/>
+  <xacro:include filename="$(find panda)/urdf/camera.xacro"/>
+  <xacro:include filename="$(find panda)/urdf/panda.gazebo.xacro"/>
+  <xacro:include filename="$(find panda)/urdf/ros_control.xacro"/>
+
+  <!-- 直接调用宏，移除所有条件判断 -->
+  <xacro:panda_arm in_gazebo="true"/>
+  <xacro:hand ns="panda" rpy="0 0 ${-pi/4}" connected_to="panda_link8"/>
+  <!-- 手眼相机：固定在 panda_hand 上。
+       Gazebo 相机 sensor 默认沿 camera_link 的 +X 方向拍摄；
+       夹爪前方是 panda_hand 的 +Z 方向；
+       因此把 camera_link 绕 Y 轴旋转 -pi/2，让 camera_link 的 +X 旋转到 panda_hand 的 +Z (夹爪前方)
+       位置: 夹爪中线正前方 0.04m (可根据需要微调) -->
+  <xacro:hand_camera ns="panda" parent="panda_hand" xyz="-0.025 0 0.04" rpy="0 ${-pi/2} 0"/>
+  <xacro:panda_gazebo robot_name="panda"/>
+
+  <xacro:panda_ros_control robot_name="panda"/>
+
+  <!-- Gazebo ros2_control 插件 -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <parameters>$(find panda)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+  
+</robot>

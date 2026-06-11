@@ -1,0 +1,15 @@
+<launch>
+  <!-- This argument must be either 'ompl', 'chomp', 'stomp', 'pilz_industrial_motion_planner' or 'all'  -->
+  <arg name="pipeline" default="ompl" />
+
+  <arg name="load_ompl" default="true" />
+  <arg name="load_chomp" default="false" />
+
+  <!-- OMPL Plugin -->
+  <include ns="move_group" file="$(find panda_moveit_config)/launch/ompl_planning_pipeline.launch.xml"
+           if="$(eval arg('load_ompl'))"/>
+
+  <!-- Chomp Planner -->
+  <include ns="move_group" file="$(find panda_moveit_config)/launch/chomp_planning_pipeline.launch.xml"
+           if="$(eval arg('load_chomp'))"/>
+</launch>
