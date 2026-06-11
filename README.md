@@ -1,0 +1,16 @@
+2026.6.5 moveit手臂已配好，camera位置已设置好
+
+问题：
+1.夹爪rviz plan失败，我发现手动拖动时，我只拖动一个夹爪，但两个夹爪一起朝一边一起运行
+2.camera图像未测试是否生效
+
+2026.6.9
+调整了camera视角方向，但夹爪问题未解决，问题详情见2026.6.5问题1
+
+2026.6.10
+放弃了在rviz中控制夹爪，我直接在代码中控制夹爪，目前是可以的
+
+2026.6.11
+都修好了，夹爪在rviz中能控制，也能用ros2指令控制，指令如下：
+ros2 action send_goal /panda_gripper_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory   "{trajectory: {joint_names: ['panda_finger_joint1','panda_finger_joint2'], points: [{positions: [0.035,0.035], velocities: [0.0,0.0], time_from_start: {sec: 1, nanosec: 0}}]}}" 
+0.035表示夹爪打开
