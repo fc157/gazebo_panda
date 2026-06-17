@@ -24,15 +24,14 @@ def generate_launch_description():
 
     model_dir = os.path.join(pkg_share, "models")
 
-    # 2. 追加 Gazebo 模型路径（仅当前进程生效）
-    if "GAZEBO_MODEL_PATH" in os.environ:
-        print("Existing GAZEBO_MODEL_PATH: ", os.environ["GAZEBO_MODEL_PATH"])
-        os.environ["GAZEBO_MODEL_PATH"] += f":{model_dir}"
+    # 构建 GAZEBO_MODEL_PATH（包含 panda 模型和系统默认模型）
+    gazebo_env = os.environ.copy()
+    existing_gmp = gazebo_env.get('GAZEBO_MODEL_PATH', '')
+    if existing_gmp:
+        gazebo_env['GAZEBO_MODEL_PATH'] = model_dir + ':' + existing_gmp
     else:
-        print("Setting GAZEBO_MODEL_PATH to: ", model_dir)
-        os.environ["GAZEBO_MODEL_PATH"] = model_dir
-        os.environ["GAZEBO_MODEL_PATH"] += f":/usr/share/gazebo-11/models"
-        
+        gazebo_env['GAZEBO_MODEL_PATH'] = model_dir + ':/usr/share/gazebo-11/models'
+    print("GAZEBO_MODEL_PATH set to: ", gazebo_env['GAZEBO_MODEL_PATH'])
 
     robot_description_content = xacro.process_file(default_model_path).toxml()
 
@@ -59,12 +58,14 @@ def generate_launch_description():
             LaunchConfiguration('world'),
         ],
         output='screen',
+        additional_env=gazebo_env,
     )
 
     # Gazebo client GUI
     gazebo_client = ExecuteProcess(
         cmd=["gzclient"],
         output='screen',
+        additional_env=gazebo_env,
     )
 
     # Spawn robot

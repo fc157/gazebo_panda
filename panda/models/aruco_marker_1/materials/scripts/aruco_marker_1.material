@@ -6,7 +6,7 @@ material aruco_marker_1/aruco_1
     {
       texture_unit
       {
-        texture aruco_1.png
+        texture ../../materials/textures/aruco_1.png
       }
     }
   }
