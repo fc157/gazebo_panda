@@ -22,6 +22,18 @@ def generate_launch_description():
         description='Path to the world file to load in Gazebo'
     )
 
+    model_dir = os.path.join(pkg_share, "models")
+
+    # 2. 追加 Gazebo 模型路径（仅当前进程生效）
+    if "GAZEBO_MODEL_PATH" in os.environ:
+        print("Existing GAZEBO_MODEL_PATH: ", os.environ["GAZEBO_MODEL_PATH"])
+        os.environ["GAZEBO_MODEL_PATH"] += f":{model_dir}"
+    else:
+        print("Setting GAZEBO_MODEL_PATH to: ", model_dir)
+        os.environ["GAZEBO_MODEL_PATH"] = model_dir
+        os.environ["GAZEBO_MODEL_PATH"] += f":/usr/share/gazebo-11/models"
+        
+
     robot_description_content = xacro.process_file(default_model_path).toxml()
 
     robot_description = {
@@ -43,6 +55,7 @@ def generate_launch_description():
             'gzserver',
             '-s', 'libgazebo_ros_init.so',
             '-s', 'libgazebo_ros_factory.so',
+            '-s', 'libgazebo_ros_physics.so',
             LaunchConfiguration('world'),
         ],
         output='screen',
@@ -148,5 +161,5 @@ def generate_launch_description():
         delayed_jsb,
         delayed_arm,
         delayed_gripper,
-        start_rviz_after_spawn,
+        #start_rviz_after_spawn,
     ])

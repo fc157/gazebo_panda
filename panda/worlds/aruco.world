@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/gazebo</namespace>
+      </ros>
+      <update_rate>30</update_rate>
+    </plugin>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://aruco_marker_1</uri>
+      <pose>0.8 0.0 0.5 0 0 0</pose>
+    </include>
+
+    <physics type="ode">
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.2</sor>
+        </solver>
+      </ode>
+    </physics>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>2.5 2.5 1.5 0 0.3 2.4</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+  </world>
+</sdf>
